@@ -1,9 +1,6 @@
 import { Resend } from 'resend';
 import { type NextRequest, NextResponse } from 'next/server';
 
-// Initialize once — Resend client is stateless and safe to reuse across requests
-const resend = new Resend(process.env.RESEND_API_KEY);
-
 // RFC-5322-lite: catches obvious malformed emails without being a regex monstrosity
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -22,22 +19,26 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'Please enter a valid email address.' }, { status: 400 });
   }
 
-  // Guard: audience ID must be configured in env — fail loudly at startup, not silently
+  // Guard: both env vars must be set — surface misconfiguration at runtime, not build time.
+  // Resend is instantiated here (not at module level) so a missing key never crashes the build.
+  const apiKey    = process.env.RESEND_API_KEY;
   const audienceId = process.env.RESEND_AUDIENCE_ID;
-  if (!audienceId) {
-    console.error('[subscribe] RESEND_AUDIENCE_ID is not set in environment variables');
+
+  if (!apiKey || !audienceId) {
+    console.error('[subscribe] Missing env var —', !apiKey ? 'RESEND_API_KEY' : 'RESEND_AUDIENCE_ID');
     return NextResponse.json({ error: 'Service unavailable. Try again later.' }, { status: 503 });
   }
 
   // ── Store in Resend Contacts ───────────────────────────────────────────────
-  // Resend's contacts.create is idempotent for the same email+audience pair,
-  // so duplicate signups are handled gracefully without extra checks here.
+  // Instantiated per-request so build-time evaluation never touches the Resend SDK.
+  // Resend's contacts.create is idempotent for the same email+audience pair.
+  const resend = new Resend(apiKey);
+
   try {
     await resend.contacts.create({ email, audienceId });
     console.log(`[subscribe] ✓ Contact added: ${email}`);
     return NextResponse.json({ success: true });
   } catch (err) {
-    // Log the full error server-side for traceability; never expose internals to the client
     console.error('[subscribe] ✗ Resend error for', email, ':', err);
     return NextResponse.json(
       { error: 'Failed to subscribe. Please try again.' },
