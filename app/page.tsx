@@ -125,7 +125,7 @@ function AppMockup() {
       <div>
         <MockTask label="Design the landing page" done />
         <MockTask label="Write the copy"          done />
-        <MockTask label="Deploy to Cloudflare Pages" done={false} />
+        <MockTask label="Deploy it"                  done={false} />
       </div>
 
       {/* Bottom bar — 1px scoutDim separator + muted controls */}
