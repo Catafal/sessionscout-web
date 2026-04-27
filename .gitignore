@@ -1,0 +1,16 @@
+# Dependencies
+node_modules/
+
+# Next.js build output
+.next/
+out/
+
+# Environment — NEVER commit .env.local (contains real API keys)
+.env.local
+.env*.local
+
+# macOS metadata
+.DS_Store
+
+# Vercel deploy artifacts
+.vercel

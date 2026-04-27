@@ -1,0 +1,35 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  *, *::before, *::after {
+    box-sizing: border-box;
+  }
+
+  html {
+    scroll-behavior: smooth;
+  }
+
+  /* Void background + neutral text — exact dark-mode values from the app */
+  body {
+    background-color: #000000;
+    color: #E6E6E6;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    overflow-x: hidden;
+  }
+
+  /* Wave animation — mirrors the menu-bar scrolling sine wave when a session is active.
+     Translates by exactly one period (10px) so the loop is perfectly seamless. */
+  @keyframes wave-scroll {
+    from { transform: translateX(0px); }
+    to   { transform: translateX(-10px); }
+  }
+
+  /* Scrollbar stays on-brand */
+  ::-webkit-scrollbar { width: 5px; }
+  ::-webkit-scrollbar-track { background: #000000; }
+  ::-webkit-scrollbar-thumb { background: #2D2D2D; border-radius: 3px; }
+  ::-webkit-scrollbar-thumb:hover { background: #3D3D3D; }
+}
